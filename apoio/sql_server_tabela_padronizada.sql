@@ -40,11 +40,23 @@ select	Age,
 from dbo.dataset_employess 
 group by Age
 
-select	YearsAtCompany, 
+
+SELECT MIN(YearsAtCompany), MAX(YearsAtCompany)
+from dbo.dataset_employess 
+
+
+SELECT MIN(MonthlyIncome), MAX(MonthlyIncome)
+from dbo.dataset_employess 
+
+SELECT MIN(DistanceFromHome), MAX(DistanceFromHome)
+from dbo.dataset_employess 
+
+
+select	BusinessTravel, 
 		count(*) quantidade, 
 		(count(*)*100)/(SELECT count(*) FROM dbo.dataset_employess) percentual
 from dbo.dataset_employess 
-group by YearsAtCompany
+group by BusinessTravel
 
 
 	-- Tabela HR (Dataset não utilizado)
