@@ -12,6 +12,39 @@ GO
 SELECT count(*)
 FROM dbo.dataset_employess
 
+sp_help dataset_employess
+
+--Attrition - Regra de 3
+select	Attrition, 
+		count(*) quantidade, 
+		(count(*)*100)/(SELECT count(*) FROM dbo.dataset_employess) percentual
+from dbo.dataset_employess 
+group by Attrition
+
+
+select	OverTime, 
+		count(*) quantidade, 
+		(count(*)*100)/(SELECT count(*) FROM dbo.dataset_employess) percentual
+from dbo.dataset_employess 
+group by OverTime
+
+select	JobSatisfaction, 
+		count(*) quantidade, 
+		(count(*)*100)/(SELECT count(*) FROM dbo.dataset_employess) percentual
+from dbo.dataset_employess 
+group by JobSatisfaction
+
+select	Age, 
+		count(*) quantidade, 
+		(count(*)*100)/(SELECT count(*) FROM dbo.dataset_employess) percentual
+from dbo.dataset_employess 
+group by Age
+
+select	YearsAtCompany, 
+		count(*) quantidade, 
+		(count(*)*100)/(SELECT count(*) FROM dbo.dataset_employess) percentual
+from dbo.dataset_employess 
+group by YearsAtCompany
 
 
 	-- Tabela HR (Dataset não utilizado)
