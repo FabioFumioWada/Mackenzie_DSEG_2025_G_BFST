@@ -1,0 +1,2 @@
+=== ANÁLISE DE VALORES AUSENTES ===
+Não há valores ausentes no dataset!

@@ -1,0 +1,4 @@
+=== ANÁLISE DE VARIÁVEIS NUMÉRICAS ===
+
+Colunas numéricas encontradas:
+PerformanceRating

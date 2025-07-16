@@ -10,3 +10,31 @@
     'YearsInCurrentRole': np.random.randint(0, 19, n_samples),
     'YearsSinceLastPromotion': np.random.randint(0, 16, n_samples),
     'YearsWithCurrManager': np.random.randint(0, 18, n_samples)
+
+
+https://www.mackenzie.br/fileadmin/CONFIGURACOES/DEFAULT_21/Resources/Public/Template/img/logo/universidade_mack_v2.svg
+
+
+
+df_processed['Attrition'] = df_processed['Attrition'].map({'Yes': 1, 'No': 0})
+
+- **One-Hot Encoding**: Department,
+                        EducationField, 
+                        JobRole, 
+                        MaritalStatus, 
+                        Gender
+
+- **Label Encoding**:   BusinessTravel, 
+                        OverTime (binárias ordenadas)
+
+- **Manter como numérica**: Education****,  
+                            JobLevel (ordinais)
+
+
+
+Features numéricas (1): ['PerformanceRating']...
+Features categóricas (8): [ 'Gender', 'MaritalStatus', 'Education', 'EducationField',
+                             'Department', 'JobRole', 'OverTime', 'BusinessTravel']
+
+
+                             
