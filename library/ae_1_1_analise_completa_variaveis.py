@@ -168,11 +168,11 @@ def fn_tratar_dados_faltantes(df: pd.DataFrame) -> pd.DataFrame:
         if df[v_col].isnull().any():
             if pd.api.types.is_numeric_dtype(df[v_col]):
                 v_mediana = df[v_col].median()
-                df[col].fillna(mediana, inplace=True)
+                df[v_col].fillna(v_mediana, inplace=True)
                 print(f"Coluna numérica '{v_col}' preenchida com a mediana ({v_mediana}).")
             elif pd.api.types.is_object_dtype(df[v_col]) or pd.api.types.is_categorical_dtype(df[v_col]):
                 v_moda = df[v_col].mode()[0]
-                df[v_col].fillna(moda, inplace=True)
+                df[v_col].fillna(v_moda, inplace=True)
                 print(f"Coluna categórica '{v_col}' preenchida com a moda ('{v_moda}').")
     print("Tratamento de dados faltantes concluído.")
     return df
