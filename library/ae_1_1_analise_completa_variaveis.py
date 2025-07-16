@@ -160,3 +160,43 @@ def fn_gerar_analise_variaveis_numericas(df: pd.DataFrame, v_local_gravacao: str
             f.write("\n") # Adiciona uma nova linha no final para formatação
 
     print(f"Relatório de variáveis numéricas salvo em {v_local_gravacao}")
+
+# Dados Faltantes
+def fn_tratar_dados_faltantes(df: pd.DataFrame) -> pd.DataFrame:
+    print("Iniciando análise de dados faltantes...")
+    for v_col in df.columns:
+        if df[v_col].isnull().any():
+            if pd.api.types.is_numeric_dtype(df[v_col]):
+                v_mediana = df[v_col].median()
+                df[col].fillna(mediana, inplace=True)
+                print(f"Coluna numérica '{v_col}' preenchida com a mediana ({v_mediana}).")
+            elif pd.api.types.is_object_dtype(df[v_col]) or pd.api.types.is_categorical_dtype(df[v_col]):
+                v_moda = df[v_col].mode()[0]
+                df[v_col].fillna(moda, inplace=True)
+                print(f"Coluna categórica '{v_col}' preenchida com a moda ('{v_moda}').")
+    print("Tratamento de dados faltantes concluído.")
+    return df
+#Outliers
+def fn_tratar_outliers(df: pd.DataFrame) -> pd.DataFrame:
+    print("Iniciando análise de outliers")
+    v_numeric_cols = df.select_dtypes(include=['int64', 'float64']).columns
+    
+    for v_col in v_numeric_cols:
+        Q1 = df[v_col].quantile(0.25)
+        Q3 = df[v_col].quantile(0.75)
+        IQR = Q3 - Q1
+        
+        v_limite_inferior = Q1 - 1.5 * IQR
+        v_limite_superior = Q3 + 1.5 * IQR
+        
+        v_outliers_count = ((df[v_col] < v_limite_inferior) | (df[v_col] > v_limite_superior)).sum()
+        
+        if v_outliers_count > 0:
+            print(f"Encontrados {v_outliers_count} outliers na coluna '{v_col}'. Realizando o capping...")
+            # Capping dos outliers
+            df[v_col] = df[v_col].clip(lower=v_limite_inferior, upper=v_limite_superior)
+        else:
+            print(f"Nenhum outlier detectado na coluna '{v_col}'.")
+            
+    print("Tratamento de outliers finalizado.")
+    return df

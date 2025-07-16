@@ -1,68 +1,119 @@
+# -*- coding: utf-8 -*-
+"""
+================================================================================
+Pipeline Completo de Machine Learning para Previsão de Attrition - TechCorp Brasil
+================================================================================
+
+Este script é o orquestrador central do projeto e executa todas as etapas
+em uma sequência lógica e reproduzível.
+
+Fluxo de Execução:
+1.  **Análise Exploratória Inicial (EDA):** Executa as funções dos scripts
+    originais para gerar relatórios e visualizações iniciais, validando a
+    compreensão básica dos dados.
+2.  **Processamento e Limpeza de Dados:** Utiliza o novo módulo 'data_processing'
+    para tratar valores faltantes e outliers.
+3.  **Engenharia de Features:** Desenvolve novas variáveis para enriquecer o
+    modelo, utilizando o módulo 'feature_engineering'.
+4.  **Modelagem Avançada:** Treina, otimiza com Optuna e avalia múltiplos
+    algoritmos de ponta para selecionar o melhor modelo, usando o módulo
+    'modeling_v2'.
+5.  **Avaliação e Interpretabilidade:** Analisa o modelo campeão em
+    profundidade, verificando métricas de negócio e gerando insights de
+    interpretabilidade com SHAP, através do módulo 'evaluation_v2'.
+6.  **Salvamento do Artefato:** O modelo final treinado é salvo em um
+    arquivo '.pkl' para que possa ser usado em produção.
+
+Para executar o pipeline completo, basta rodar este arquivo.
+"""
+
+# --- Importação dos Módulos do Projeto ---
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import openpyxl as pxl
+import joblib
+import warnings
 
+# Módulos customizados (pasta 'library')
 import library.dataset_library as ds_lib #biblioteca resposnável pela geração do dataset sintético
 import library.ae_1_1_analise_completa_variaveis as fn_analise_completa #biblioteca responsável pela análise completa do dataset
 import library.ae_1_2_ident_padroes_correlacoes as fn_ident_padroes #biblioteca responsável pela identificação de padrões e correlações do dataset
 import library.ae_1_3_visualizacoes_criativas_informativas as fn_visualizacoes #biblioteca responsável pelas visualizações criativas e informativas do dataset
-
-#Variáveis
-v_local_resultados = 'G:/Meu Drive/[MBA]/[Data Science Experience]/[Trabalho Final]/3_Git/Mackenzie_DSEG_2025_G_BFST/results/'
-
-#gerar o dataset de empregados
-df_dataset_employess = ds_lib.fn_cria_dataset()
-    #-->df_dataset_employess.to_excel('dataset_employess.xlsx', index=False)
-
-###############################################################
-## 1.1 Análise e Estrutura Completa das Variáveis do Dataset ##
-###############################################################
-
-#gerar a Análise e Estrutura Completa das Variáveis do Dataset
-#análise completa
-df_dataset_employess_comp_properties = fn_analise_completa.fn_gerar_analise_completa_dataframe(df_dataset_employess)
-df_dataset_employess_comp_properties.to_excel(v_local_resultados+'/1_1_analise_variaveis/'+'dataset_employess_completa_properties.xlsx', index=False)
-
-#análise básica
-df_dataset_employess_basica_properties = fn_analise_completa.fn_gerar_analise_basica_dataframe(df_dataset_employess)
-df_dataset_employess_basica_properties.to_excel(v_local_resultados+'/1_1_analise_variaveis/'+'dataset_employess_basica_properties.xlsx', index=False)
-
-#análse estatística descritiva
-df_dataset_employess_estatistica_properties = fn_analise_completa.fn_gerar_analise_estatistica_dataframe(df_dataset_employess)
-df_dataset_employess_estatistica_properties.to_excel(v_local_resultados+'/1_1_analise_variaveis/'+'dataset_employess_estatistica_properties.xlsx', index=False)
-
-#análise attriton taxa
-df_dataset_employess_attriton_properties = fn_analise_completa.fn_gerar_analise_attrition_dataframe(df_dataset_employess)
-df_dataset_employess_attriton_properties.to_excel(v_local_resultados+'/1_1_analise_variaveis/'+'dataset_employess_attrition_taxa.xlsx', index=False)
-
-#análise valores_ausentes
-fn_analise_completa.fn_gerar_analise_valores_ausentes(df_dataset_employess, v_local_resultados+'/1_1_analise_variaveis/'+'dataset_employess_valores_ausentes.txt')
-
-#análise variaveis_numericas
-fn_analise_completa.fn_gerar_analise_variaveis_numericas(df_dataset_employess, v_local_resultados+'/1_1_analise_variaveis/'+'dataset_employess_variaveis_numericas.txt')
+import library.fe_2_1_novas_features as news_feature # Feature Engineering
+import library.fe_2_3_impacto_novas_features as news_feature_impacto # Processamento de Dados
+import library.mo_3_X_modelagem as modeling # Modelagem
+import library.ai_4_X_avaliacao_interpretacao as evaluation #Avaliação e interpretação
 
 
-###############################################################
-## 1.3 Visualizações Criativas e Informativas do Dataset     ##
-###############################################################
+# Ignora avisos para uma saída mais limpa
+warnings.filterwarnings('ignore')
 
-#gerar gráficos de análise do dataset   
-fn_visualizacoes.fn_gerar_graficos_attrition_atual(df_dataset_employess, v_local_resultados+'1_3_graficos_cenario_atual/')  
-fn_visualizacoes.fn_gerar_graficos_correlacao_attrition_atual(df_dataset_employess, v_local_resultados+'1_3_graficos_cenario_atual/')
-fn_visualizacoes.fn_gerar_matriz_correlacao(df_dataset_employess, v_local_resultados+'1_3_graficos_cenario_atual/') 
+def run_full_pipeline():
+    """
+    Função principal que executa o pipeline de ponta a ponta.
+    """
+    print("=========================================================")
+    print("=== INICIANDO PIPELINE DE PREVISÃO DE ATTRITION v2.0 ===")
+    print("=========================================================")
 
+    # --- Configuração de Diretórios ---
+    # Cria uma pasta 'results' para salvar os artefatos, se não existir
+    results_path = 'results'
+    os.makedirs(results_path, exist_ok=True)
+    
+    # --- ETAPA 0: GERAÇÃO DE DADOS ---
+    print("\n[ETAPA 0/6] Gerando o dataset de funcionários...")
+    df_original = dataset_library.fn_cria_dataset()
+    print(f"Dataset gerado com sucesso. Dimensões: {df_original.shape}")
 
-###############################################################
-#### Alteração na apresentação de valores do dataframe     ####
-###############################################################
+    # --- ETAPA 1: ANÁLISE EXPLORATÓRIA INICIAL (Scripts Originais) ---
+    print("\n[ETAPA 1/6] Executando Análise Exploratória de Dados (EDA)...")
+    path_eda = os.path.join(results_path, '1_analise_exploratoria')
+    os.makedirs(path_eda, exist_ok=True)
+    
+    # Gerando relatório estatístico completo
+    df_analise = fn_analise_completa.fn_gerar_analise_completa_dataframe(df_original.copy())
+    df_analise.to_excel(os.path.join(path_eda, 'analise_completa_variaveis.xlsx'), index=False)
+    print("  - Relatório estatístico completo salvo.")
 
-###############################################################
-## 1.2 Identificação de Padrões e Correlações do Dataset     ##
-###############################################################
-#gerar a identificação de padrões correlações
-df_dataset_employess_padronizado = fn_ident_padroes.fn_ident_padroes_correlacoes(df_dataset_employess)
-    #-->df_dataset_employess_padronizado.to_excel(v_local_resultados+'dataset_employess_padronizado.xlsx', index=False)
+    # Gerando gráficos iniciais
+    fn_visualizacoes.fn_gerar_graficos_attrition_atual(df_original.copy(), path_eda)
+    fn_visualizacoes.fn_gerar_matriz_correlacao(df_original.copy(), path_eda)
+    print("  - Gráficos de análise exploratória salvos.")
 
+    # --- ETAPA 2: PROCESSAMENTO E LIMPEZA DE DADOS ---
+    print("\n[ETAPA 2/6] Processando e limpando os dados...")
+    df_processed = data_processing.fn_tratar_dados_faltantes(df_original.copy())
+    df_processed = data_processing.fn_tratar_outliers(df_processed)
+    print("Limpeza de dados concluída.")
 
-df_dataset_employess.info()    
+    # --- ETAPA 3: ENGENHARIA DE FEATURES ---
+    print("\n[ETAPA 3/6] Criando novas features para o modelo...")
+    df_featured = feature_engineering.fn_criar_features(df_processed.copy())
+    print("Engenharia de features concluída.")
+
+    # --- ETAPA 4: MODELAGEM AVANÇADA ---
+    print("\n[ETAPA 4/6] Executando o pipeline de modelagem avançada...")
+    modelo_final, X_train, X_test, y_train, y_test = modeling.fn_executar_modelagem_avancada(df_featured.copy())
+    print("Modelagem avançada concluída.")
+    
+    # --- ETAPA 5: AVALIAÇÃO E INTERPRETABILIDADE ---
+    print("\n[ETAPA 5/6] Executando a avaliação aprofundada do modelo...")
+    evaluation.fn_run_evaluation_pipeline_avancada(modelo_final, X_test, y_test, df_featured)
+    print("Avaliação detalhada e análise SHAP concluídas.")
+
+    # --- ETAPA 6: SALVAMENTO DO MODELO FINAL ---
+    print("\n[ETAPA 6/6] Salvando o artefato do modelo final...")
+    model_filename = os.path.join(results_path, 'modelo_attrition_final_v2.pkl')
+    joblib.dump(modelo_final, model_filename)
+    print(f"Modelo final salvo com sucesso como '{model_filename}'")
+    
+    print("\n=========================================================")
+    print("====== PIPELINE CONCLUÍDO COM SUCESSO =====")
+    print("=========================================================")
+
+# Este bloco garante que a função `run_full_pipeline` seja executada
+# apenas quando o script `main.py` é rodado diretamente.
+if __name__ == "__main__":
+    run_full_pipeline()
