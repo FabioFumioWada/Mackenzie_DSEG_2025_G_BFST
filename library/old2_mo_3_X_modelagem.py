@@ -6,8 +6,7 @@ import warnings
 from sklearn.model_selection import train_test_split, StratifiedKFold
 from sklearn.preprocessing import StandardScaler
 from imblearn.pipeline import Pipeline as ImbPipeline
-# TÉCNICA DE BALANCEAMENTO MAIS EFICIENTE PARA MEMÓRIA
-from imblearn.under_sampling import RandomUnderSampler
+from imblearn.over_sampling import SMOTE
 from imblearn.ensemble import BalancedRandomForestClassifier
 
 # Modelos Avançados
@@ -25,11 +24,9 @@ from sklearn.metrics import recall_score, f1_score
 warnings.filterwarnings('ignore')
 optuna.logging.set_verbosity(optuna.logging.WARNING)
 
-def optimize_model(X_train, y_train, model_pipeline, param_space_func, n_trials=15):
+def optimize_model(X_train, y_train, model_pipeline, param_space_func, n_trials=30):
     """
     Função genérica para otimização de hiperparâmetros usando Optuna.
-    O número de trials foi reduzido para otimizar o tempo de execução.
-    Retorna os melhores parâmetros e o melhor score.
     """
     def objective(trial):
         params = param_space_func(trial)
@@ -53,7 +50,7 @@ def optimize_model(X_train, y_train, model_pipeline, param_space_func, n_trials=
     
     print(f"Melhor F1-Score (CV): {study.best_value:.4f}")
     print(f"Melhores parâmetros: {study.best_params}")
-    return study.best_params, study.best_value
+    return study.best_params
 
 def fn_executar_modelagem_avancada(df: pd.DataFrame):
     """
@@ -75,7 +72,7 @@ def fn_executar_modelagem_avancada(df: pd.DataFrame):
 
     # 2. Definição dos Modelos e Espaços de Parâmetros para Optuna
     
-    # LightGBM com RandomUnderSampler para eficiência
+    # LightGBM
     def lgb_param_space(trial):
         return {
             'classifier__n_estimators': trial.suggest_int('classifier__n_estimators', 100, 1000),
@@ -84,13 +81,11 @@ def fn_executar_modelagem_avancada(df: pd.DataFrame):
         }
     pipe_lgb = ImbPipeline([
         ('scaler', StandardScaler()),
-        # Para datasets grandes, RandomUnderSampler é mais eficiente em memória que SMOTE.
-        # Ele reduz a classe majoritária ao invés de criar dados sintéticos.
-        ('sampler', RandomUnderSampler(random_state=42)),
+        ('smote', SMOTE(random_state=42)),
         ('classifier', lgb.LGBMClassifier(random_state=42))
     ])
 
-    # BalancedRandomForest (já lida com desbalanceamento internamente)
+    # BalancedRandomForest
     def brf_param_space(trial):
         return {
             'classifier__n_estimators': trial.suggest_int('classifier__n_estimators', 100, 500),
@@ -99,7 +94,7 @@ def fn_executar_modelagem_avancada(df: pd.DataFrame):
         }
     pipe_brf = ImbPipeline([
         ('scaler', StandardScaler()),
-        # Não precisa de SMOTE/Sampler, o modelo já é balanceado
+        # Não precisa de SMOTE, o modelo já é balanceado
         ('classifier', BalancedRandomForestClassifier(random_state=42))
     ])
     
@@ -107,37 +102,23 @@ def fn_executar_modelagem_avancada(df: pd.DataFrame):
     print("\n--- Etapa 2: Otimização de Hiperparâmetros com Optuna ---")
     
     print("\nOtimizando LightGBM...")
-    best_params_lgb, best_score_lgb = optimize_model(X_train, y_train, pipe_lgb, lgb_param_space)
+    best_params_lgb = optimize_model(X_train, y_train, pipe_lgb, lgb_param_space, n_trials=25)
     
     print("\nOtimizando BalancedRandomForest...")
-    best_params_brf, best_score_brf = optimize_model(X_train, y_train, pipe_brf, brf_param_space)
+    best_params_brf = optimize_model(X_train, y_train, pipe_brf, brf_param_space, n_trials=25)
 
     # 4. Treinamento do Modelo Final
     print("\n--- Etapa 3: Treinamento do Modelo Final ---")
     
-    # Lógica para selecionar o modelo campeão com base no score da otimização
-    if best_score_brf > best_score_lgb:
-        print("\nModelo Campeão: BalancedRandomForestClassifier")
-        # Remove o prefixo 'classifier__' das chaves do dicionário de parâmetros
-        params_limpos = {key.replace('classifier__', ''): value for key, value in best_params_brf.items()}
-        # Instancia o pipeline do modelo campeão com os melhores parâmetros
-        final_model = ImbPipeline([
-            ('scaler', StandardScaler()),
-            ('classifier', BalancedRandomForestClassifier(random_state=42, **params_limpos))
-        ])
-    else:
-        print("\nModelo Campeão: LightGBM")
-        # Remove o prefixo 'classifier__' das chaves do dicionário de parâmetros
-        params_limpos = {key.replace('classifier__', ''): value for key, value in best_params_lgb.items()}
-        # Instancia o pipeline do modelo campeão com os melhores parâmetros
-        final_model = ImbPipeline([
-            ('scaler', StandardScaler()),
-            ('sampler', RandomUnderSampler(random_state=42)), # Garante o uso da mesma técnica
-            ('classifier', lgb.LGBMClassifier(random_state=42, **params_limpos))
-        ])
-
+    # Vamos eleger o BalancedRandomForest como nosso campeão (geralmente robusto)
+    # e treiná-lo com os melhores parâmetros encontrados.
+    final_model = ImbPipeline([
+        ('scaler', StandardScaler()),
+        ('classifier', BalancedRandomForestClassifier(random_state=42, **best_params_brf))
+    ])
+    
     final_model.fit(X_train, y_train)
-    print("Modelo final treinado com sucesso.")
+    print("Modelo final (BalancedRandomForest) treinado com sucesso.")
     
     print("\n======================================================")
     print("MODELAGEM AVANÇADA CONCLUÍDA")

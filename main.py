@@ -35,6 +35,7 @@ import openpyxl as pxl
 import joblib
 import warnings
 import os
+import datetime # Módulo para obter a data e hora
 
 # Módulos customizados (pasta 'library')
 import library.dataset_library as lib_ds #biblioteca resposnável pela geração do dataset sintético
@@ -57,6 +58,8 @@ def run_full_pipeline():
     print("=========================================================")
     print("=== INICIANDO PIPELINE DE PREVISÃO DE ATTRITION v2.0 ===")
     print("=========================================================")
+    # Adiciona o print com a data e hora atuais
+    print(f"Início da execução: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
     # --- Configuração de Diretórios ---
     # Cria uma pasta 'results' para salvar os artefatos, se não existir
@@ -65,11 +68,15 @@ def run_full_pipeline():
     
     # --- ETAPA 0: GERAÇÃO DE DADOS ---
     print("\n[ETAPA 0/6] Gerando o dataset de funcionários...")
+    # Adiciona o print com a data e hora atuais
+    print(f"Início da execução: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     df_original = lib_ds.fn_cria_dataset()
     print(f"Dataset gerado com sucesso. Dimensões: {df_original.shape}")
 
     # --- ETAPA 1: ANÁLISE EXPLORATÓRIA INICIAL (Scripts Originais) ---
     print("\n[ETAPA 1/6] Executando Análise Exploratória de Dados (EDA)...")
+    # Adiciona o print com a data e hora atuais
+    print(f"Início da execução: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     path_eda = os.path.join(results_path, '1_analise_exploratoria')
     os.makedirs(path_eda, exist_ok=True)
     
@@ -85,27 +92,37 @@ def run_full_pipeline():
 
     # --- ETAPA 2: PROCESSAMENTO E LIMPEZA DE DADOS ---
     print("\n[ETAPA 2/6] Processando e limpando os dados...")
+    # Adiciona o print com a data e hora atuais
+    print(f"Início da execução: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     df_processed = lib_analise_completa.fn_tratar_dados_faltantes(df_original.copy())
     df_processed = lib_analise_completa.fn_tratar_outliers(df_processed)
     print("Limpeza de dados concluída.")
 
     # --- ETAPA 3: ENGENHARIA DE FEATURES ---
     print("\n[ETAPA 3/6] Criando novas features para o modelo...")
+    # Adiciona o print com a data e hora atuais
+    print(f"Início da execução: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     df_featured = lib_news_feature.fn_criar_novas_features(df_processed.copy())
     print("Engenharia de features concluída.")
 
     # --- ETAPA 4: MODELAGEM AVANÇADA ---
     print("\n[ETAPA 4/6] Executando o pipeline de modelagem avançada...")
+    # Adiciona o print com a data e hora atuais
+    print(f"Início da execução: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     modelo_final, X_train, X_test, y_train, y_test = lib_modelagem.fn_executar_modelagem_avancada(df_featured.copy())
     print("Modelagem avançada concluída.")
     
     # --- ETAPA 5: AVALIAÇÃO E INTERPRETABILIDADE ---
     print("\n[ETAPA 5/6] Executando a avaliação aprofundada do modelo...")
+    # Adiciona o print com a data e hora atuais
+    print(f"Início da execução: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     lib_aval_interpret.fn_run_lib_aval_interpret_pipeline_avancada(modelo_final, X_test, y_test, df_featured)
     print("Avaliação detalhada e análise SHAP concluídas.")
 
     # --- ETAPA 6: SALVAMENTO DO MODELO FINAL ---
     print("\n[ETAPA 6/6] Salvando o artefato do modelo final...")
+    # Adiciona o print com a data e hora atuais
+    print(f"Início da execução: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     model_filename = os.path.join(results_path, 'modelo_attrition_final_v2.pkl')
     joblib.dump(modelo_final, model_filename)
     print(f"Modelo final salvo com sucesso como '{model_filename}'")
@@ -113,6 +130,8 @@ def run_full_pipeline():
     print("\n=========================================================")
     print("====== PIPELINE CONCLUÍDO COM SUCESSO =====")
     print("=========================================================")
+    # Adiciona o print com a data e hora atuais
+    print(f"Início da execução: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
 # Este bloco garante que a função `run_full_pipeline` seja executada
 # apenas quando o script `main.py` é rodado diretamente.
