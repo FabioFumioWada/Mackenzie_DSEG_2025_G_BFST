@@ -1,0 +1,50 @@
+Age
+DistanceFromHome
+Education
+EnvironmentSatisfaction
+JobInvolvement
+JobLevel
+JobSatisfaction
+MonthlyIncome
+NumCompaniesWorked
+PercentSalaryHike
+PerformanceRating
+RelationshipSatisfaction
+StockOptionLevel
+TotalWorkingYears
+TrainingTimesLastYear
+WorkLifeBalance
+YearsAtCompany
+YearsInCurrentRole
+YearsSinceLastPromotion
+YearsWithCurrManager
+TenureToAgeRatio
+IncomePerYearOfExperience
+TotalSatisfaction
+WorkLifeImbalance
+PromotionStagnation
+JobHoppingRate
+LowInvolvement
+IncomeRelativeToLevel
+RoleTimeRatio
+CompanyLoyalty
+OvertimeAndSatisfaction
+BusinessTravel_Non-Travel
+BusinessTravel_Travel_Frequently
+BusinessTravel_Travel_Rarely
+Department_Human Resources
+Department_Research & Development
+Department_Sales
+EducationField_Human Resources
+EducationField_Life Sciences
+EducationField_Marketing
+EducationField_Medical
+EducationField_Other
+EducationField_Technical Degree
+Gender_Female
+Gender_Male
+MaritalStatus_Divorced
+MaritalStatus_Married
+MaritalStatus_Single
+OverTime_No
+OverTime_Yes
