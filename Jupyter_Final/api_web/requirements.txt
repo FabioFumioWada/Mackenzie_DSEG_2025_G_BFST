@@ -1,8 +1,10 @@
+# requirements.txt
+
+fastapi
+uvicorn[standard]
 pandas
+numpy
 scikit-learn
-joblib
-flask
-flask-cors
-gunicorn
-lightgbm
+xgboost
 imblearn
+joblib

@@ -1,26 +1,10 @@
-﻿Arquivo de dependências Python para o projeto de previsão de attrition.
+# requirements.txt
 
-Use o comando 'pip install -r requirements.txt' para instalar.
-
-Core para Análise e Manipulação de Dados
+fastapi
+uvicorn[standard]
 pandas
 numpy
-
-Visualização de Dados
-matplotlib
-seaborn
-
-Machine Learning e Pipeline
 scikit-learn
 xgboost
-imbalanced-learn
-
-Interpretabilidade do Modelo
-shap
-
-Serialização do Modelo
+imblearn
 joblib
-
-Parâmetros e Barras de Progresso
-optuna
-tqdm
