@@ -1,0 +1,9 @@
+# render.yaml
+
+services:
+  - type: web
+    name: attrition-api-techcorp
+    env: python
+    plan: free # Você pode escolher um plano pago para mais performance
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn app:app --host 0.0.0.0 --port $PORT"
